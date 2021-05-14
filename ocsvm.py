@@ -11,7 +11,7 @@
 import argparse
 from collections import namedtuple
 import sys
-from util.plt_metrcis import plt_matrix
+from util.plt_metrcis import plt_matrix,roc_auc,distribution,violinplot,boxplot
 from util.get_data import make_test_data,load_data
 
 import matplotlib.pyplot as plt
@@ -118,7 +118,7 @@ def main():
     # load and prepare data
     X_train = load_data('./data/unsw/Normal.csv',44)
     X_fuzzer = load_data('./data/unsw/Fuzzers.csv', 44)
-    x_test, y_test = make_test_data(X_train, 1000, X_fuzzer)
+    x_test, y_test = make_test_data(X_train, 2000, X_fuzzer)
     print("x_shape:",x_test.shape)
     print("y_shape:",y_test.shape)
 
@@ -127,7 +127,7 @@ def main():
     roc_scores = []
 
     clf = svm.OneClassSVM( kernel='rbf',gamma='auto')
-    X_train = X_train[1:1000, :]
+    X_train = X_train[1:8000, :]
     clf.fit(X_train)
     # x_test, y_test = make_test_data(X_train,2000,X_fuzzer)
     y_pred_train = clf.predict(x_test)
@@ -142,8 +142,10 @@ def main():
     # print("roc_auc:",roc_auc,"   prc_auc:",prc_auc)
     # y_test = np.ones((x_test.shape[0], 1), dtype=np.int) * (-1)
 
-    plt_matrix(y_test,y_pred_train)
-
+    plt_matrix(y_test,y_pred_train,'ocsvm')
+    distribution(scores,'svm')
+    # violinplot(scores,y_test,'svm')
+    boxplot(scores,y_test,'svm')
     # from sklearn.metrics import confusion_matrix
     # conf_matrix = confusion_matrix(y_test, y_pred_train)
     # conf_matrix_new = conf_matrix
