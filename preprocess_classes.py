@@ -82,7 +82,7 @@ def process_class_malware():
     Shellcode['proto'] = le.fit_transform(Shellcode['proto'])
     Shellcode['service'] = le.fit_transform(Shellcode['service'])
     Shellcode['state'] = le.fit_transform(Shellcode['state'])
-    Shellcode.to_csv('data/unsw/Reconnaissance.csv', index=False)
+    Shellcode.to_csv('data/unsw/Shellcode.csv', index=False)
 
     Worms = combined_data[combined_data['attack_cat'] == 'Worms']
     vector9 = Worms['attack_cat']
