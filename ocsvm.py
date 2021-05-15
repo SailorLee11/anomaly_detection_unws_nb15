@@ -13,6 +13,7 @@ from collections import namedtuple
 import sys
 from util.plt_metrcis import plt_matrix,roc_auc,distribution,violinplot,boxplot,plot_auc
 from util.get_data import make_test_data,load_data,load_malware_data
+from sklearn.metrics import classification_report
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -56,7 +57,7 @@ def main():
     # violinplot(scores,y_test,'svm')
     boxplot(scores,y_test,'svm')
     plot_auc(y_test,scores,'oneclassSVM')
-
+    print()
 
 if __name__ == '__main__':
     main()
