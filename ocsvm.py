@@ -11,7 +11,7 @@
 import argparse
 from collections import namedtuple
 import sys
-from util.plt_metrcis import plt_matrix,roc_auc,distribution,violinplot,boxplot
+from util.plt_metrcis import plt_matrix,roc_auc,distribution,violinplot,boxplot,plot_auc
 from util.get_data import make_test_data,load_data,load_malware_data
 
 import matplotlib.pyplot as plt
@@ -37,7 +37,7 @@ def main():
     roc_scores = []
 
     clf = svm.OneClassSVM( kernel='rbf',gamma='auto')
-    X_train = X_train[1:10000, :]
+    X_train = X_train[1:1000, :]
     clf.fit(X_train)
     # x_test, y_test = make_test_data(X_train,2000,X_fuzzer)
     y_pred_train = clf.predict(x_test)
@@ -55,7 +55,7 @@ def main():
     distribution(scores,'svm')
     # violinplot(scores,y_test,'svm')
     boxplot(scores,y_test,'svm')
-
+    plot_auc(y_test,scores)
 
 
 if __name__ == '__main__':

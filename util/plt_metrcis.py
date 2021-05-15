@@ -8,9 +8,11 @@
 @Software: PyCharm
 """
 import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix,roc_curve,auc
+from sklearn.metrics import confusion_matrix,roc_curve, auc, roc_auc_score
 from scipy.optimize import brentq
 from scipy.interpolate import interp1d
+from sklearn import metrics
+from sklearn.metrics import classification_report
 
 import numpy as np
 import pandas as pd
@@ -35,7 +37,7 @@ def plt_matrix(y_test,y_pred_train,description):
     plt.savefig('./conclusion/confusion_matrix_%s.png'%(description))
     plt.show()
 
-def roc_auc(y_test, scores, pos_label=1, show=False, path=None):
+def roc_auc(y_test, scores,  description,pos_label=1, show=False):
     """Compute ROC curve and ROC area for each class"""
     # True/False Positive Rates.
     fpr, tpr, _ = roc_curve(y_test, scores, pos_label=pos_label)
@@ -62,10 +64,22 @@ def roc_auc(y_test, scores, pos_label=1, show=False, path=None):
         plt.legend(loc="lower right")
         # if path:
         #     mkdir(os.path.dirname(path))
-        plt.savefig(path + "_roc_auc.png")
+        plt.savefig('./conclusion/roc_auc%s.png'%(description))
         plt.show()
     #         plt.close()
     return {'roc_auc': roc_auc}
+
+def plot_roc(labels, predict_prob, description):
+    false_positive_rate, true_positive_rate, thresholds = roc_curve(labels, predict_prob, pos_label=1)
+    roc_auc = auc(false_positive_rate, true_positive_rate)
+    plt.title('ROC')
+    plt.plot(false_positive_rate, true_positive_rate, 'b', label='AUC = %0.4f' % roc_auc)
+    plt.legend(loc='lower right')
+    plt.plot([0, 1], [0, 1], 'r--')
+    plt.ylabel('TPR')
+    plt.xlabel('FPR')
+    plt.savefig('./conclusion/roc_auc%s.png' % (description))
+    plt.show()
 
 #         distribution(score, self.getname())
 def distribution(y, name):
@@ -119,4 +133,24 @@ def boxplot(x, y, name):
     df = pd.DataFrame(data, columns=["class", "score"])
     sns.boxplot(x="class", y="score", data=df)
     plt.savefig('./conclusion/boxplot_%s.png' % (name))
+    plt.show()
+
+
+def get_score(y_test,y_pred_train):
+    area = roc_auc_score(y_test, y_pred_train.round())
+    FPR, recall, thresholds = roc_curve(y_test,y_pred_train.round())
+    print(classification_report(y_test,y_pred_train.round()))
+
+def plot_auc(y_test, pred):
+    fpr, tpr, threshold = metrics.roc_curve(y_test, pred)
+    roc_auc = metrics.auc(fpr, tpr)
+    plt.figure(figsize=(6, 6))
+    plt.title('GAN model  ROC')
+    plt.plot(fpr, tpr, 'b', label='Val AUC = %0.3f' % roc_auc)
+    plt.legend(loc='lower right')
+    plt.plot([0, 1], [0, 1], 'r--')
+    plt.xlim([0, 1])
+    plt.ylim([0, 1])
+    plt.ylabel('True Positive Rate')
+    plt.xlabel('False Positive Rate')
     plt.show()
