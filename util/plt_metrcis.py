@@ -141,11 +141,11 @@ def get_score(y_test,y_pred_train):
     FPR, recall, thresholds = roc_curve(y_test,y_pred_train.round())
     print(classification_report(y_test,y_pred_train.round()))
 
-def plot_auc(y_test, pred):
+def plot_auc(y_test, pred,name):
     fpr, tpr, threshold = metrics.roc_curve(y_test, pred)
     roc_auc = metrics.auc(fpr, tpr)
     plt.figure(figsize=(6, 6))
-    plt.title('GAN model  ROC')
+    plt.title('%s model  ROC'%(name) )
     plt.plot(fpr, tpr, 'b', label='Val AUC = %0.3f' % roc_auc)
     plt.legend(loc='lower right')
     plt.plot([0, 1], [0, 1], 'r--')

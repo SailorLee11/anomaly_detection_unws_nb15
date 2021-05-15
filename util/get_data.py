@@ -65,8 +65,11 @@ def load_malware_data():
 def make_test_data(x_normal, normal_num, x_malware):
     """make test data which has specified mixed rate(rate_anomaly_test).
     shuffle and concatenate normal and abnormal data"""
-    # x_normal = np.random.shuffle(x_normal)
-    x_test_normal = x_normal[0:normal_num, :]
+
+    rand_arr = np.arange(x_normal.shape[0])
+    np.random.shuffle(rand_arr)
+    x_test_normal = x_normal[rand_arr[0:normal_num]]
+    # x_test_normal = rand_arr_[0:normal_num, :]
     y_test_normal = np.ones((normal_num, 1), dtype=np.int)
     # 异常的离群样本点
     print("y_test_normal:",y_test_normal.shape)

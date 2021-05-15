@@ -37,7 +37,7 @@ def main():
     roc_scores = []
 
     clf = svm.OneClassSVM( kernel='rbf',gamma='auto')
-    X_train = X_train[1:1000, :]
+    X_train = X_train[1:9000, :]
     clf.fit(X_train)
     # x_test, y_test = make_test_data(X_train,2000,X_fuzzer)
     y_pred_train = clf.predict(x_test)
@@ -55,7 +55,7 @@ def main():
     distribution(scores,'svm')
     # violinplot(scores,y_test,'svm')
     boxplot(scores,y_test,'svm')
-    plot_auc(y_test,scores)
+    plot_auc(y_test,scores,'oneclassSVM')
 
 
 if __name__ == '__main__':
