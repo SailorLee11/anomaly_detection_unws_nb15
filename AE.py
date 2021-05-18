@@ -30,24 +30,30 @@ class AE(nn.Module):
         self.input_size  = input_size
         self.encoder = nn.Sequential(
             # [b, 784] => [b, 256]
-            nn.Linear(input_size, 32),
+            nn.Linear(input_size, 8),
+            nn.Dropout(0.5),  # drop 50% neurons
             nn.ReLU(),
-            # [b, 256] => [b, 64]
-            nn.Linear(32, 8),
-            nn.ReLU(),
-            # [b, 64] => [b, 20]
-            nn.Linear(8, 4),
-            nn.ReLU()
+            # # [b, 256] => [b, 64]
+            # nn.Linear(32, 8),
+            # nn.Dropout(0.5),  # drop 50% neurons
+            # nn.ReLU(),
+            # # [b, 64] => [b, 20]
+            # nn.Linear(8, 4),
+            # nn.Dropout(0.5),  # drop 50% neurons
+            # nn.ReLU()
         )
         self.decoder = nn.Sequential(
             # [b, 20] => [b, 64]
-            nn.Linear(4, 8),
-            nn.ReLU(),
-            # [b, 64] => [b, 256]
-            nn.Linear(8, 32),
-            nn.ReLU(),
-            # [b, 256] => [b, 784]
-            nn.Linear(32, input_size),
+            # nn.Linear(4, 8),
+            # nn.Dropout(0.5),  # drop 50% neurons
+            # nn.ReLU(),
+            # # [b, 64] => [b, 256]
+            # nn.Linear(8, 32),
+            # nn.Dropout(0.5),  # drop 50% neurons
+            # nn.ReLU(),
+            # # [b, 256] => [b, 784]
+            nn.Linear(8, input_size),
+            nn.Dropout(0.5),  # drop 50% neurons
             nn.ReLU()
         )
 
@@ -94,9 +100,8 @@ def main():
     X_test = sc.transform(x_test)
     # 转为tensor张量
     X_train, X_test = torch.FloatTensor(X_train), torch.FloatTensor(X_test)
-    train_set = TensorDataset(X_train)
-    train_loader = DataLoader(dataset=train_set, batch_size=10, shuffle=True)
-    # 制作label
+    train_set = TensorDataset(X_train) #对tensor进行打包
+    train_loader = DataLoader(dataset=train_set, batch_size=10, shuffle=True)  #数据集放入Data.DataLoader中，可以生成一个迭代器，从而我们可以方便的进行批处理
 
 
     input_size = X_train.shape[1]
@@ -124,15 +129,22 @@ def main():
 
         print('Epoch {}/{} : loss: {:.4f}'.format(
             epoch + 1, num_epochs, loss))
-    recon_err_train = get_recon_err(X_train,model)
-    recon_err_test = get_recon_err(X_test,model)
-    recon_err = np.concatenate([recon_err_train, recon_err_test])
-    labels = np.concatenate([np.zeros(len(recon_err_train)), y_test])
-    index = np.arange(0, len(labels))
 
-    sns.kdeplot(recon_err[labels == 0], shade=True)
-    sns.kdeplot(recon_err[labels == 1], shade=True)
-    plt.show()
+    threshold = model.history["loss"][-1]
+    testing_set_predictions = model.forward(x_test)
+    test_losses = calculate_losses(x_test, testing_set_predictions)
+    testing_set_predictions = np.zeros(len(test_losses))
+    testing_set_predictions[np.where(test_losses > threshold)] = 1
+
+    # recon_err_train = get_recon_err(X_train,model)
+    # recon_err_test = get_recon_err(X_test,model)
+    # recon_err = np.concatenate([recon_err_train, recon_err_test])
+    # labels = np.concatenate([np.zeros(len(recon_err_train)), y_test])
+    # index = np.arange(0, len(labels))
+    #
+    # sns.kdeplot(recon_err[labels == 0], shade=True)
+    # sns.kdeplot(recon_err[labels == 1], shade=True)
+    # plt.show()
 
     # mnist_train = datasets.MNIST('mnist', train=True, transform=transforms.Compose([
     #     transforms.ToTensor()
