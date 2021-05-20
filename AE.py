@@ -19,7 +19,7 @@ from torch import nn, optim
 from util.get_data import _normalization_process_data,load_malware_data
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader,TensorDataset
-from util.preprocess_data_NSL_KDD import
+from util.preprocess_data_NSL_KDD import early_configuration
 from sklearn.preprocessing import (FunctionTransformer, StandardScaler)
 
 class AE(nn.Module):
@@ -107,6 +107,8 @@ def main():
     # X_test = sc.transform(x_test)
     # # 转为tensor张量
     # X_train, X_test = torch.FloatTensor(X_train), torch.FloatTensor(X_test)
+
+    X_train,X_test,y_train,y_test = early_configuration()
     print("X_train",X_train.shape)
     print("X_test",X_test.shape)
     train_set = TensorDataset(X_train) #对tensor进行打包

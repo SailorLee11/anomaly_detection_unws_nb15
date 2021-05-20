@@ -213,8 +213,8 @@ def make_combined_y_data(y_train,y_test,classes):
     return y_train,y_test
 
 def early_configuration():
-    training_df = pd.read_csv("../data/NSLKDD/KDDTrain+.csv", header=None)
-    testing_df = pd.read_csv("../data/NSLKDD/KDDTest+.csv", header=None)
+    training_df = pd.read_csv("./data/NSLKDD/KDDTrain+.csv", header=None)
+    testing_df = pd.read_csv("./data/NSLKDD/KDDTest+.csv", header=None)
 
     df,training_df,testing_df = disassemble_the_data_set(training_df, testing_df,columns)
     training_df,testing_df = _process_sympolic_data(training_df, testing_df,df)
