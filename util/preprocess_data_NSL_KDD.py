@@ -12,11 +12,6 @@ import numpy as np
 import torch
 from sklearn.preprocessing import MinMaxScaler
 
-
-# keras_verbosity = 2
-# training_df = pd.read_csv("./data/NSLKDD/KDDTrain+.csv", header=None)
-# testing_df = pd.read_csv("./data/NSLKDD/KDDTest+.csv", header=None)
-#
 columns = [
     'duration',
     'protocol_type',
@@ -148,11 +143,6 @@ def disassemble_the_data_set(training_df, testing_df,columns):
     training_df.columns = columns
     testing_df.columns = columns
 
-    # columns = columns
-    # dos_attacks = dos_attacks
-    # r2l_attacks = r2l_attacks
-    # u2r_attacks = u2r_attacks
-    # probe_attacks = probe_attacks
 
     print("Training set has {} rows.".format(len(training_df)))
     print("Testing set has {} rows.".format(len(testing_df)))
@@ -183,28 +173,9 @@ def disassemble_the_data_set(training_df, testing_df,columns):
     testing_df= df.iloc[-test_samples_length:,:]
     return df,training_df,testing_df
 
-# print("The training set has {} possible outcomes \n".format(len(training_outcomes)) )
-# print(", ".join(training_outcomes)+".")
-# print("\nThe testing set has {} possible outcomes \n".format(len(testing_outcomes)))
-# print(", ".join(testing_outcomes)+".")
 
 # ------------------------------处理 非数值类型--------------------------------------
 
-
-# training_df,testing_df = _process_sympolic_data(training_df, testing_df)
-
-
-# sympolic_columns = ["protocol_type", "service", "flag"]
-# label_column = "Class"
-# for column in df.columns:
-#     if column in sympolic_columns:
-#         # 如果非数值格式的,采用 one_hot编码格式进行计算
-#         _encode_text(training_df, testing_df, column)
-#     elif not column == label_column:
-#         _minmax_scale_values(training_df, testing_df, column)
-
-# training_df.head(5)
-# testing_df.head(5)
 
 def _trainsfrom_tensor(training_df,testing_df):
     """
@@ -242,62 +213,9 @@ def make_combined_y_data(y_train,y_test,classes):
     return y_train,y_test
 
 def early_configuration():
-    training_df = pd.read_csv("./data/NSLKDD/KDDTrain+.csv", header=None)
-    testing_df = pd.read_csv("./data/NSLKDD/KDDTest+.csv", header=None)
-    # columns = [
-    #     #     'duration',
-    #     #     'protocol_type',
-    #     #     'service',
-    #     #     'flag',
-    #     #     'src_bytes',
-    #     #     'dst_bytes',
-    #     #     'land',
-    #     #     'wrong_fragment',
-    #     #     'urgent',
-    #     #     'hot',
-    #     #     'num_failed_logins',
-    #     #     'logged_in',
-    #     #     'num_compromised',
-    #     #     'root_shell',
-    #     #     'su_attempted',
-    #     #     'num_root',
-    #     #     'num_file_creations',
-    #     #     'num_shells',
-    #     #     'num_access_files',
-    #     #     'num_outbound_cmds',
-    #     #     'is_host_login',
-    #     #     'is_guest_login',
-    #     #     'count',
-    #     #     'srv_count',
-    #     #     'serror_rate',
-    #     #     'srv_serror_rate',
-    #     #     'rerror_rate',
-    #     #     'srv_rerror_rate',
-    #     #     'same_srv_rate',
-    #     #     'diff_srv_rate',
-    #     #     'srv_diff_host_rate',
-    #     #     'dst_host_count',
-    #     #     'dst_host_srv_count',
-    #     #     'dst_host_same_srv_rate',
-    #     #     'dst_host_diff_srv_rate',
-    #     #     'dst_host_same_src_port_rate',
-    #     #     'dst_host_srv_diff_host_rate',
-    #     #     'dst_host_serror_rate',
-    #     #     'dst_host_srv_serror_rate',
-    #     #     'dst_host_rerror_rate',
-    #     #     'dst_host_srv_rerror_rate',
-    #     #     'outcome',
-    #     #     'difficulty'
-    #     # ]
-    #     # dos_attacks = ["back", "land", "neptune", "smurf", "teardrop", "pod", "apache2", "udpstorm", "processtable",
-    #     #                "mailbomb"]
-    #     # r2l_attacks = ["snmpgetattack", "snmpguess", "worm", "httptunnel", "named", "xlock", "xsnoop", "sendmail",
-    #     #                "ftp_write",
-    #     #                "guess_passwd", "imap", "multihop", "phf", "spy", "warezclient", "warezmaster"]
-    #     # u2r_attacks = ["sqlattack", "buffer_overflow", "loadmodule", "perl", "rootkit", "xterm", "ps", "httptunnel"]
-    #     # probe_attacks = ["ipsweep", "nmap", "portsweep", "satan", "saint", "mscan"]
-    #     # # 识别为5个大类
-    #     # classes = ["Normal", "Dos", "R2L", "U2R", "Probe"]
+    training_df = pd.read_csv("../data/NSLKDD/KDDTrain+.csv", header=None)
+    testing_df = pd.read_csv("../data/NSLKDD/KDDTest+.csv", header=None)
+
     df,training_df,testing_df = disassemble_the_data_set(training_df, testing_df,columns)
     training_df,testing_df = _process_sympolic_data(training_df, testing_df,df)
     X_train,X_test,y_train,y_test = _trainsfrom_tensor(training_df, testing_df)
