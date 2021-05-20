@@ -19,6 +19,7 @@ from torch import nn, optim
 from util.get_data import _normalization_process_data,load_malware_data
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader,TensorDataset
+from util.preprocess_data_NSL_KDD import
 from sklearn.preprocessing import (FunctionTransformer, StandardScaler)
 
 class AE(nn.Module):
@@ -64,6 +65,7 @@ class AE(nn.Module):
         """
         batchsz = x.size(0)
         # flatten
+        # -1表示一个不确定的数，就是你如果不确定你想要reshape成几行，但是你很肯定要reshape成4列，那不确定的地方就可以写成-1
         x = x.view(batchsz, -1)
         # encoder
         x = self.encoder(x)
@@ -72,6 +74,11 @@ class AE(nn.Module):
         # reshape
 
         return x
+
+
+# def get_model():
+
+
 
 def calculate_losses(x, preds):
     losses = np.zeros(len(x))
@@ -88,18 +95,20 @@ def main():
     制作数据集.,X_train用作训练数据集的正常流量；X_nom_test用做测试数据集的正常流量
     :return:
     """
-    X_nom = _normalization_process_data(44,'./data/unsw/Normal.csv')
-    x_test_malware = load_malware_data()
-    X_train, X_nom_test = train_test_split(X_nom, train_size=0.85, random_state=1)
-    x_test = np.concatenate([x_test_malware,X_nom_test],axis = 0)
-    y_test = np.concatenate([np.ones(len(x_test_malware)), np.zeros(len(X_nom_test))])    # 制作label
+    # X_nom = _normalization_process_data(44,'./data/unsw/Normal.csv')
+    # x_test_malware = load_malware_data()
+    # X_train, X_nom_test = train_test_split(X_nom, train_size=0.85, random_state=1)
+    # x_test = np.concatenate([x_test_malware,X_nom_test],axis = 0)
+    # y_test = np.concatenate([np.ones(len(x_test_malware)), np.zeros(len(X_nom_test))])    # 制作label
 
     # 变准化处理
-    sc = StandardScaler()
-    X_train = sc.fit_transform(X_train)
-    X_test = sc.transform(x_test)
-    # 转为tensor张量
-    X_train, X_test = torch.FloatTensor(X_train), torch.FloatTensor(X_test)
+    # sc = StandardScaler()
+    # X_train = sc.fit_transform(X_train)
+    # X_test = sc.transform(x_test)
+    # # 转为tensor张量
+    # X_train, X_test = torch.FloatTensor(X_train), torch.FloatTensor(X_test)
+    print("X_train",X_train.shape)
+    print("X_test",X_test.shape)
     train_set = TensorDataset(X_train) #对tensor进行打包
     train_loader = DataLoader(dataset=train_set, batch_size=10, shuffle=True)  #数据集放入Data.DataLoader中，可以生成一个迭代器，从而我们可以方便的进行批处理
 
@@ -110,7 +119,7 @@ def main():
     optimizer = torch.optim.Adam(model.parameters(), 0.00001)
     print(model)
     loss_func = nn.MSELoss(reduction='mean')
-    num_epochs = 50
+    num_epochs = 10
 
     for epoch in range(num_epochs):
         total_loss = 0.
@@ -130,58 +139,15 @@ def main():
         print('Epoch {}/{} : loss: {:.4f}'.format(
             epoch + 1, num_epochs, loss))
 
-    threshold = model.history["loss"][-1]
-    testing_set_predictions = model.forward(x_test)
-    test_losses = calculate_losses(x_test, testing_set_predictions)
-    testing_set_predictions = np.zeros(len(test_losses))
-    testing_set_predictions[np.where(test_losses > threshold)] = 1
 
-    # recon_err_train = get_recon_err(X_train,model)
-    # recon_err_test = get_recon_err(X_test,model)
-    # recon_err = np.concatenate([recon_err_train, recon_err_test])
-    # labels = np.concatenate([np.zeros(len(recon_err_train)), y_test])
-    # index = np.arange(0, len(labels))
-    #
-    # sns.kdeplot(recon_err[labels == 0], shade=True)
-    # sns.kdeplot(recon_err[labels == 1], shade=True)
-    # plt.show()
+    # 如何判断异常值？？？
 
-    # mnist_train = datasets.MNIST('mnist', train=True, transform=transforms.Compose([
-    #     transforms.ToTensor()
-    # ]), download=True)
-    # mnist_train = DataLoader(mnist_train, batch_size=32, shuffle=True)
-    #
-    # mnist_test = datasets.MNIST('mnist', train=False, transform=transforms.Compose([
-    #     transforms.ToTensor()
-    # ]), download=True)
-    # mnist_test = DataLoader(mnist_test, batch_size=32)
-    #
-    # epochs = 1000
-    # lr = 1e-3
-    # model = AE()
-    # criteon = nn.MSELoss()
-    # optimizer = optim.Adam(model.parameters(), lr=lr)
-    # print(model)
-    #
-    # viz = visdom.Visdom()
-    # for epoch in range(epochs):
-    #     # 不需要label，所以用一个占位符"_"代替
-    #     for batchidx, (x, _) in enumerate(mnist_train):
-    #         x_hat = model(x)
-    #         loss = criteon(x_hat, x)
-    #
-    #         # backprop
-    #         optimizer.zero_grad()
-    #         loss.backward()
-    #         optimizer.step()
-    #
-    #     if epoch % 10 == 0:
-    #         print(epoch, 'loss:', loss.item())
-    #     x, _ = iter(mnist_test).next()
-    #     with torch.no_grad():
-    #         x_hat = model(x)
-    #     viz.images(x, nrow=8, win='x', opts=dict(title='x'))
-    #     viz.images(x_hat, nrow=8, win='x_hat', opts=dict(title='x_hat'))
+    # threshold = model.history["loss"][-1]
+    # testing_set_predictions = model.forward(x_test)
+    # test_losses = calculate_losses(x_test, testing_set_predictions)
+    # testing_set_predictions = np.zeros(len(test_losses))
+    # testing_set_predictions[np.where(test_losses > threshold)] = 1
+
 
 
 if __name__ == '__main__':
