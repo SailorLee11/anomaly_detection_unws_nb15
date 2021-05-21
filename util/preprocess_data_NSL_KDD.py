@@ -144,17 +144,17 @@ def disassemble_the_data_set(training_df, testing_df,columns):
     testing_df.columns = columns
 
 
-    print("Training set has {} rows.".format(len(training_df)))
-    print("Testing set has {} rows.".format(len(testing_df)))
+    # print("Training set has {} rows.".format(len(training_df)))
+    # print("Testing set has {} rows.".format(len(testing_df)))
 
     # 获取列表中的流量的类型
     training_outcomes=training_df["outcome"].unique()
     testing_outcomes=testing_df["outcome"].unique()
 
-    print("\nThe training set has {} possible outcomes \n".format(len(training_outcomes)) )
-    print(", ".join(training_outcomes)+".")
-    print("\nThe testing set has {} possible outcomes \n".format(len(testing_outcomes)))
-    print(", ".join(testing_outcomes)+".")
+    # print("\nThe training set has {} possible outcomes \n".format(len(training_outcomes)) )
+    # print(", ".join(training_outcomes)+".")
+    # print("\nThe testing set has {} possible outcomes \n".format(len(testing_outcomes)))
+    # print(", ".join(testing_outcomes)+".")
 
     # 测试集的长度
     test_samples_length = len(testing_df)
@@ -188,16 +188,15 @@ def _trainsfrom_tensor(training_df,testing_df):
     x,y_train=training_df,training_df.pop("Class").values
     # dataframe 转为  矩阵格式
     x=x.values
-    print(x)
+    # print(x)
     # 处理测试集的文件
     x_test,y_test=testing_df,testing_df.pop("Class").values
-    print(x_test)
+    # print(x_test)
     x_test=x_test.values
     # 这里转为 tensor格式
     X_train, X_test = torch.FloatTensor(x), torch.FloatTensor(x_test)
     return X_train,X_test,y_train,y_test
 
-# X_train,X_test,y_train,y_test = _trainsfrom_tensor(training_df,testing_df)
 
 def make_combined_y_data(y_train,y_test,classes):
     """
@@ -213,6 +212,10 @@ def make_combined_y_data(y_train,y_test,classes):
     return y_train,y_test
 
 def early_configuration():
+    """
+    外部函数从里面调用该函数作为借口
+    :return:
+    """
     training_df = pd.read_csv("./data/NSLKDD/KDDTrain+.csv", header=None)
     testing_df = pd.read_csv("./data/NSLKDD/KDDTest+.csv", header=None)
 
@@ -222,6 +225,9 @@ def early_configuration():
     y_train,y_test = make_combined_y_data(y_train, y_test, classes)
     return X_train,X_test,y_train,y_test
 
+
+
+# -----------------------------------------单元测试-----------------------------------------
 def main():
     X_train,X_test,y_train,y_test = early_configuration()
 

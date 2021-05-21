@@ -21,6 +21,7 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader,TensorDataset
 from util.preprocess_data_NSL_KDD import early_configuration
 from sklearn.preprocessing import (FunctionTransformer, StandardScaler)
+from sklearn.metrics import confusion_matrix,accuracy_score,recall_score,precision_score,f1_score
 
 class AE(nn.Module):
     """
@@ -83,12 +84,12 @@ class AE(nn.Module):
 def calculate_losses(x, preds):
     losses = np.zeros(len(x))
     for i in range(len(x)):
-        losses[i] = ((preds[i] - x[i]) ** 2).mean(axis=None)
+        losses[i] = ((torch.from_numpy(preds[i]) - x[i]) ** 2).mean(axis=None)
 
     return losses
 
 def get_recon_err(X,model):
-    return torch.mean((model(X)-X)**2,dim = 1).detach().numpy()
+    return torch.mean((model.forward(X)-X)**2,dim = 1).detach().numpy()
 
 def main():
     """
@@ -121,36 +122,101 @@ def main():
     optimizer = torch.optim.Adam(model.parameters(), 0.00001)
     print(model)
     loss_func = nn.MSELoss(reduction='mean')
-    num_epochs = 10
-
+    num_epochs = 30
+    tmp_total_loss = 0
     for epoch in range(num_epochs):
         total_loss = 0.
         for step, (x,) in enumerate(train_loader):
-            x_recon = model(x)
+            x_recon = model.forward(x)
             # loss = calculate_losses(x_recon,x)
             loss = loss_func(x_recon, x)
             optimizer.zero_grad()
-            # 计算中间的叶子节点
+            # 计算中间的叶子节点，计算图
             loss.backward()
             # 内容信息反馈
             optimizer.step()
 
             total_loss += loss.item() * len(x)
         total_loss /= len(train_set)
-
+        if epoch>(num_epochs-5):
+            tmp_total_loss +=loss
         print('Epoch {}/{} : loss: {:.4f}'.format(
             epoch + 1, num_epochs, loss))
-
-
+    threshold = tmp_total_loss/5
+    threshold = threshold.double()
+    print(threshold)
     # 如何判断异常值？？？
-
+    # model = model.eval()
+    # print(model)
+    # # net = net.eval()  # not needed - no dropout
+    # X = torch.Tensor(X_test)  # all input item as Tensors
+    # Y = model(X)  # all outputs as Tensors
+    # N = len(X)
+    # max_se = 0.0;
+    # max_ix = 0
+    # for i in range(N):
+    #     curr_se = torch.sum((X[i] - Y[i]) * (X[i] - Y[i]))
+    #     if curr_se.item() > max_se:
+    #         max_se = curr_se.item()
+    #         max_ix = i
     # threshold = model.history["loss"][-1]
-    # testing_set_predictions = model.forward(x_test)
-    # test_losses = calculate_losses(x_test, testing_set_predictions)
+    # testing_set_predictions = model.forward(X_test)
+    # print(testing_set_predictions)
+    # testing_set_predictions = testing_set_predictions.detach().numpy()
+
+    recon_err_train = get_recon_err(X_train,model)
+    recon_err_test = get_recon_err(X_test,model)
+    recon_err = np.concatenate([recon_err_train, recon_err_test])
+    labels = np.concatenate([np.zeros(len(recon_err_train)), y_test])
+    index = np.arange(0, len(labels))
+
+    sns.kdeplot(recon_err[labels == 0], shade=True)
+    sns.kdeplot(recon_err[labels == 1], shade=True)
+    plt.show()
+
+    from sklearn.metrics import accuracy_score, f1_score
+
+    threshold = np.linspace(0, 10, 500)
+    acc_list = []
+    f1_list = []
+
+    for t in threshold:
+        y_pred = (recon_err_test > t).astype(np.int)
+        acc_list.append(accuracy_score(y_pred, y_test))
+        f1_list.append(f1_score(y_pred, y_test))
+
+    plt.figure(figsize=(8, 6))
+    plt.plot(threshold, acc_list, c='y', label='acc')
+    plt.plot(threshold, f1_list, c='b', label='f1')
+    plt.xlabel('threshold')
+    plt.ylabel('classification score')
+    plt.legend()
+    plt.show()
+
+    i = np.argmax(f1_list)
+    t = threshold[i]
+    score = f1_list[i]
+    print('Recommended threshold: %.3f, related f1 score: %.3f' % (t, score))
+
+    y_pred = (recon_err_test > t).astype(np.int)
+    FN = ((y_test == 1) & (y_pred == 0)).sum()
+    FP = ((y_test == 0) & (y_pred == 1)).sum()
+    print('In %d data of test set, FN: %d, FP: %d' % (len(y_test), FN, FP))
+
+    # test_losses = get_recon_err(X_test, model)
+    # print(type(test_losses))
     # testing_set_predictions = np.zeros(len(test_losses))
     # testing_set_predictions[np.where(test_losses > threshold)] = 1
-
-
+    #
+    # accuracy = accuracy_score(y_test, testing_set_predictions)
+    # recall = recall_score(y_test, testing_set_predictions)
+    # precision = precision_score(y_test, testing_set_predictions)
+    # f1 = f1_score(y_test, testing_set_predictions)
+    #
+    # print("accuracy:",accuracy)
+    # print("recall:",recall)
+    # print("precision:",precision)
+    # print("f1:",f1)
 
 if __name__ == '__main__':
     main()
